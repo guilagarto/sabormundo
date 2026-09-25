@@ -1,79 +1,82 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lançar Nova Receita - Sabormundo</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        h2 { margin-bottom: 20px; font-size: 1.4rem; color: #1a1a1a; border-bottom: 2px solid #ff6b6b; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; outline: none; }
-        textarea { resize: vertical; }
-        .btn-box { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 4px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
-        .btn-save { background-color: #ff6b6b; color: #fff; }
-        .btn-cancel { background-color: #6c757d; color: #fff; }
-        .alert { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; }
-    </style>
-</head>
-<body>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Cadastrar Nova Receita') }}
+        </h2>
+    </x-slot>
 
-    <div class="container">
-        <h2>Lançar Nova Receita Mundial</h2>
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="padding: 24px;">
+                
+                <div style="margin-bottom: 20px;">
+                    <a href="{{ route('dashboard') }}" style="color: #4f46e5; text-decoration: none; font-weight: bold; font-size: 14px;">← Voltar para a Lista</a>
+                </div>
 
-        @if ($errors->any())
-            <div class="alert">
-                <ul style="margin-left: 20px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+                <form method="POST" action="{{ route('receitas.store') }}" style="display: flex; flex-direction: column; gap: 15px;">
+                    @csrf
+
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Título da Receita</label>
+                        <input type="text" name="titulo" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Origem / País</label>
+                            <input type="text" name="pais" placeholder="Ex: Itália" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">URL da Imagem (Opcional)</label>
+                            <input type="text" name="imagem" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Modo de Preparo</label>
+                        <textarea name="modo_preparo" rows="5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; resize: none;"></textarea>
+                    </div>
+
+                    <!-- CONTAINER DE INGREDIENTES DINÂMICOS -->
+                    <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label style="font-weight: 700; display: block; margin-bottom: 10px; color: #1e293b; font-size: 14px;">📋 Ingredientes da Receita</label>
+                        
+                        <div id="container-ingredientes" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                            <div class="linha-ingrediente" style="display: flex; gap: 6px;">
+                                <input type="text" name="ingredientes_nome[]" placeholder="Ingrediente (ex: Farinha)" required style="flex: 2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                <input type="text" name="ingredientes_qtd[]" placeholder="Qtd" required style="flex: 0.8; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center;">
+                                <input type="text" name="ingredientes_unidade[]" placeholder="Medida (g, xícara)" required style="flex: 1.2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                            </div>
+                        </div>
+
+                        <button type="button" id="btn-add-ingrediente" style="background-color: #0f172a; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;">
+                            ➕ Adicionar mais um ingrediente
+                        </button>
+                    </div>
+
+                    <button type="submit" style="background-color: #16a34a; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 8px; font-size: 15px; cursor: pointer; align-self: flex-start; margin-top: 10px;">
+                        💾 Salvar Receita Completa
+                    </button>
+                </form>
+
             </div>
-        @endif
-
-        <form action="{{ route('dashboard.store') }}" method="POST">
-            @csrf
-
-            <div class="form-group">
-                <label for="titulo">Título da Receita</label>
-                <input type="text" name="titulo" id="titulo" placeholder="Ex: Tacos Al Pastor" required>
-            </div>
-
-            <div class="form-group">
-                <label for="pais_id">País da Culinária</label>
-                <select name="pais_id" id="pais_id" required>
-                    <option value="">Selecione o País...</option>
-                    @foreach($paises as $p)
-                        <option value="{{ $p->id }}">{{ $p->nome }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="imagem">URL da Imagem (Opcional)</label>
-                <input type="text" name="imagem" id="imagem" placeholder="https://site.com">
-            </div>
-
-            <div class="form-group">
-                <label for="ingredientes">Ingredientes</label>
-                <textarea name="ingredientes" id="ingredientes" rows="5" placeholder="Digite os ingredientes passo a passo..." required></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="modo_preparo">Modo de Preparo</label>
-                <textarea name="modo_preparo" id="modo_preparo" rows="6" placeholder="Descreva as instruções de cozimento..." required></textarea>
-            </div>
-
-            <div class="btn-box">
-                <a href="{{ route('dashboard') }}" class="btn btn-cancel">Cancelar</a>
-                <button type="submit" class="btn btn-save">Gravar Receita</button>
-            </div>
-        </form>
+        </div>
     </div>
 
-</body>
-</html>
+    <script>
+        document.getElementById('btn-add-ingrediente').addEventListener('click', function() {
+            const container = document.getElementById('container-ingredientes');
+            const novaLinha = document.createElement('div');
+            novaLinha.className = 'linha-ingrediente';
+            novaLinha.style.display = 'flex';
+            novaLinha.style.gap = '6px';
+            
+            novaLinha.innerHTML = `
+                <input type="text" name="ingredientes_nome[]" placeholder="Ingrediente" style="flex: 2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                <input type="text" name="ingredientes_qtd[]" placeholder="Qtd" style="flex: 0.8; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center;">
+                <input type="text" name="ingredientes_unidade[]" placeholder="Medida" style="flex: 1.2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+            `;
+            container.appendChild(novaLinha);
+        });
+    </script>
+</x-app-layout>

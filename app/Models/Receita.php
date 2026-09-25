@@ -13,9 +13,14 @@ class Receita extends Model
     // caso sua tabela antiga não possua essas duas colunas exatas
     public $timestamps = false; 
     // Conecta a coluna pais_id da tabela receitas ao ID da tabela paises
-public function pais()
-{
-    return $this->belongsTo(Pais::class, 'pais_id');
-}
+//public function pais()
+//{
+    //return $this->belongsTo(Pais::class, 'pais_id');
+//}
+    // Uma Receita possui vários Ingredientes
+    public function ingredientes()
+    {
+        return $this->hasMany(RecipeIngredient::class, 'receita_id');
+    }
 
 }

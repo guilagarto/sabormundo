@@ -10,76 +10,151 @@ class ReceitaController extends Controller
 {
     // Modificado: Lista os países ou filtra as receitas se um país for selecionado
     public function index(Request $request)
-    {
-        // Pega todos os países para montar o menu/filtros
-        $paises = Pais::all();
+{
+    // REMOVA A LINHA: $paises = Pais::all();
+    
+    // Substitua por esta lista estática e limpa para alimentar o seu select HTML
+    $paises = [
+        ['id' => 'Brasil', 'nome' => 'Brasil'],
+        ['id' => 'Portugal', 'nome' => 'Portugal'],
+        ['id' => 'Italia', 'nome' => 'Itália'],
+        ['id' => 'Franca', 'nome' => 'França'],
+        ['id' => 'Japao', 'nome' => 'Japão'],
+    ];
 
-        // Se o usuário clicou em um país específico, filtra por ele
-        if ($request->has('pais_id')) {
-            $receitas = Receita::with('pais')
-                ->where('pais_id', $request->pais_id)
-                ->paginate(15);
-        } else {
-            // Se não clicou em nada, traz todas de forma paginada
-            $receitas = Receita::with('pais')->paginate(15);
-        }
+    // Transforma em coleção para manter compatibilidade caso o seu HTML use métodos do Eloquent
+    $paises = collect($paises)->map(fn($p) => (object)$p);
 
-        return view('dashboard.index', compact('receitas', 'paises'));
-    }
+    // Ajuste o restante da lógica de listagem de receitas que você já tinha abaixo
+    $receitas = Receita::with('ingredientes')->paginate(15);
+
+    return view('dashboard', compact('paises', 'receitas'));
+}
+
 
    public function create()
 {
-    $paises = Pais::all(); // Puxa os países para o formulário de cadastro
+    // REMOVA A LINHA: $paises = Pais::all();
+    
+    // Lista estática temporária para alimentar o formulário de cadastro
+    $paises = collect([
+        ['id' => 'Brasil', 'nome' => 'Brasil'],
+        ['id' => 'Portugal', 'nome' => 'Portugal'],
+        ['id' => 'Italia', 'nome' => 'Itália'],
+        ['id' => 'Franca', 'nome' => 'França'],
+        ['id' => 'Japao', 'nome' => 'Japão'],
+    ])->map(fn($p) => (object)$p);
+
     return view('dashboard.create', compact('paises'));
 }
 
 
+    /**
+     * Salva uma nova receita e seus ingredientes associados no banco de dados.
+     */
     public function store(Request $request)
     {
-        // (Mantenha o seu código atual da função store aqui...)
+        // 1. Validação simples dos dados do formulário fixo
+        $request->validate([
+            'titulo' => 'required|max:255',
+            'modo_preparo' => 'required',
+        ]);
+
+        // 2. Salva os dados básicos da receita na tabela principal
+        $receita = new Receita();
+        $receita->titulo = $request->titulo;
+        $receita->slug = \Illuminate\Support\Str::slug($request->titulo);
+        $receita->modo_preparo = $request->modo_preparo;
+        $receita->pais = $request->pais; // Se adaptando ao campo de texto do País que criamos
+        $receita->imagem = $request->imagem;
+        $receita->save(); // Aqui a receita ganha um ID oficial no banco
+
+        // 3. Salva a lista de ingredientes individuais vinculados a esse ID
+        if ($request->has('ingredientes_nome')) {
+            foreach ($request->ingredientes_nome as $index => $nome) {
+                // Só grava se o nome do ingrediente não estiver em branco
+                if (!empty($nome)) {
+                    \App\Models\RecipeIngredient::create([
+                        'receita_id'     => $receita->id,
+                        'nome'           => $nome,
+                        'quantidade'     => $request->ingredientes_qtd[$index] ?? '',
+                        'unidade_medida' => $request->ingredientes_unidade[$index] ?? '',
+                    ]);
+                }
+            }
+        }
+
+        // Redireciona de volta para evitar telas brancas
+        return redirect()->route('dashboard')->with('sucesso', 'Receita cadastrada com sucesso!');
     }
+
     
 
 // ... (mantenha seus métodos index, create e store)
 
 // 1. Abre a tela de edição buscando os dados da receita atual e listando os países
 public function edit($id)
-{
-    $receita = Receita::findOrFail($id);
-    $paises = Pais::all(); // Necessário para o select de países no formulário
-    return view('dashboard.edit', compact('receita', 'paises'));
-}
+    {
+        // Busca a receita trazendo os ingredientes acoplados por relacionamento
+        $receita = Receita::with('ingredientes')->findOrFail($id);
+        return view('dashboard.edit', compact('receita'));
+    }
 
 // 2. Salva as alterações da receita editada no banco
 public function update(Request $request, $id)
-{
-    $request->validate([
-        'titulo' => 'required|max:255',
-        'ingredientes' => 'required',
-        'modo_preparo' => 'required',
-        'pais_id' => 'required|integer',
-    ]);
+    {
+        $request->validate([
+            'titulo' => 'required|max:255',
+            'modo_preparo' => 'required',
+        ]);
 
-    $receita = Receita::findOrFail($id);
-    $receita->titulo = $request->titulo;
-    $receita->slug = \Illuminate\Support\Str::slug($request->titulo);
-    $receita->ingredientes = $request->ingredientes;
-    $receita->modo_preparo = $request->modo_preparo;
-    $receita->pais_id = $request->pais_id;
-    $receita->imagem = $request->imagem;
-    $receita->save();
+        $receita = Receita::findOrFail($id);
+        $receita->titulo = $request->titulo;
+        $receita->slug = \Illuminate\Support\Str::slug($request->titulo);
+        $receita->modo_preparo = $request->modo_preparo;
+        $receita->pais = $request->pais;
+        $receita->imagem = $request->imagem;
+        $receita->save();
 
-   return redirect()->route('dashboard')->with('sucesso', 'Receita lançada com sucesso!');
+        // Limpa os ingredientes antigos vinculados para reinserir a nova lista atualizada
+        // Essa estratégia é extremamente estável para formulários dinâmicos
+        $receita->ingredientes()->delete();
 
-}
+        // Insere a nova lista de ingredientes atualizada vinda da tela
+        if ($request->has('ingredientes_nome')) {
+            foreach ($request->ingredientes_nome as $index => $nome) {
+                if (!empty($nome)) {
+                    \App\Models\RecipeIngredient::create([
+                        'receita_id'     => $receita->id,
+                        'nome'           => $nome,
+                        'quantidade'     => $request->ingredientes_qtd[$index] ?? '',
+                        'unidade_medida' => $request->ingredientes_unidade[$index] ?? '',
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->route('dashboard')->with('sucesso', 'Receita atualizada com sucesso!');
+    }
 
 // 3. Exclui a receita do banco de dados de forma definitiva
-public function destroy($id)
-{
-    $receita = Receita::findOrFail($id);
-    $receita->delete();
+    public function destroy($id)
+        {
+            $receita = Receita::findOrFail($id);
+            $receita->delete(); // Deleta a receita e o banco apaga os ingredientes associados sozinho
 
-    return redirect()->back()->with('sucesso', 'Receita excluída com sucesso!');
-}
+            return redirect()->route('dashboard')->with('sucesso', 'Receita excluída da base de dados!');
+        }
+    /**
+     * Exibe a página pública (Vitrine de Receitas) com os ingredientes acoplados.
+     */
+    public function homePublica()
+    {
+        $receitas = \App\Models\Receita::with('ingredientes')
+                           ->orderBy('created_at', 'desc')
+                           ->get();
+
+        return view('home', compact('receitas'));
+    }
 
 }

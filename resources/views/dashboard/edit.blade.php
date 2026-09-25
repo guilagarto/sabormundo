@@ -1,70 +1,97 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Receita - Sabormundo</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: #f4f6f9; color: #333; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        h2 { margin-bottom: 20px; font-size: 1.4rem; color: #1a1a1a; border-bottom: 2px solid #ff6b6b; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; color: #555; }
-        input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; outline: none; }
-        textarea { resize: vertical; }
-        .btn-box { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 4px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
-        .btn-save { background-color: #ff6b6b; color: #fff; }
-        .btn-cancel { background-color: #6c757d; color: #fff; }
-    </style>
-</head>
-<body>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Editar Receita: ') }} {{ \$receita->titulo }}
+        </h2>
+    </x-slot>
 
-    <div class="container">
-        <h2>Editar: {{ $receita->titulo }}</h2>
+    <div class="py-12">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="padding: 24px;">
+                
+                <div style="margin-bottom: 20px;">
+                    <a href="{{ route('dashboard') }}" style="color: #4f46e5; text-decoration: none; font-weight: bold; font-size: 14px;">← Voltar para a Lista</a>
+                </div>
 
-        <form action="{{ route('dashboard.update', $receita->id) }}" method="POST">
-            @csrf
-            @method('PUT')
+                <form method="POST" action="{{ route('receitas.update', \$receita->id) }}" style="display: flex; flex-direction: column; gap: 15px;">
+                    @csrf
+                    @method('PUT') <!-- Diretiva crucial do Laravel para aceitar rotas PUT -->
 
-            <div class="form-group">
-                <label for="titulo">Título da Receita</label>
-                <input type="text" name="titulo" id="titulo" value="{{ $receita->titulo }}" required>
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Título da Receita</label>
+                        <input type="text" name="titulo" value="{{ \$receita->titulo }}" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Origem / País</label>
+                            <input type="text" name="pais" value="{{ \$receita->pais }}" placeholder="Ex: Itália" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">URL da Imagem (Opcional)</label>
+                            <input type="text" name="imagem" value="{{ \$receita->imagem }}" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Modo de Preparo</label>
+                        <textarea name="modo_preparo" rows="5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; resize: none;">{{ \$receita->modo_preparo }}</textarea>
+                    </div>
+
+                    <!-- CONTAINER DE INGREDIENTES EXISTENTES E DINÂMICOS -->
+                    <div style="background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label style="font-weight: 700; display: block; margin-bottom: 10px; color: #1e293b; font-size: 14px;">📋 Editar Ingredientes</label>
+                        
+                        <div id="container-ingredientes" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                            <!-- Lista e preenche os ingredientes atuais vindo do banco de dados -->
+                            @forelse(receita->ingredientes as ingrediente)
+                                <div class="linha-ingrediente" style="display: flex; gap: 6px; align-items: center;">
+                                    <input type="text" name="ingredientes_nome[]" value="{{ \$ingrediente->nome }}" required style="flex: 2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                    <input type="text" name="ingredientes_qtd[]" value="{{ \$ingrediente->quantidade }}" required style="flex: 0.8; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center;">
+                                    <input type="text" name="ingredientes_unidade[]" value="{{ \$ingrediente->unidade_medida }}" required style="flex: 1.2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                    <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px;">❌</button>
+                                </div>
+                            @empty
+                                <!-- Caso a receita não tenha nenhum ingrediente lançado por erro anterior -->
+                                <div class="linha-ingrediente" style="display: flex; gap: 6px;">
+                                    <input type="text" name="ingredientes_nome[]" placeholder="Ingrediente" style="flex: 2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                    <input type="text" name="ingredientes_qtd[]" placeholder="Qtd" style="flex: 0.8; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center;">
+                                    <input type="text" name="ingredientes_unidade[]" placeholder="Medida" style="flex: 1.2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <button type="button" id="btn-add-ingrediente" style="background-color: #0f172a; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;">
+                            ➕ Adicionar novo campo de ingrediente
+                        </button>
+                    </div>
+
+                    <button type="submit" style="background-color: #2563eb; color: white; border: none; padding: 12px; font-weight: bold; border-radius: 8px; font-size: 15px; cursor: pointer; align-self: flex-start; margin-top: 10px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+                        💾 Salvar Alterações
+                    </button>
+                </form>
+
             </div>
-
-            <div class="form-group">
-                <label for="pais_id">País de Origem</label>
-                <select name="pais_id" id="pais_id" required>
-                    @foreach($paises as $p)
-                        <option value="{{ $p->id }}" {{ $receita->pais_id == $p->id ? 'selected' : '' }}>
-                            {{ $p->nome }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="imagem">URL da Imagem</label>
-                <input type="text" name="imagem" id="imagem" value="{{ $receita->imagem }}">
-            </div>
-
-            <div class="form-group">
-                <label for="ingredientes">Ingredientes</label>
-                <textarea name="ingredientes" id="ingredientes" rows="5" required>{{ $receita->ingredientes }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="modo_preparo">Modo de Preparo</label>
-                <textarea name="modo_preparo" id="modo_preparo" rows="6" required>{{ $receita->modo_preparo }}</textarea>
-            </div>
-
-            <div class="btn-box">
-                <a href="{{ route('dashboard') }}" class="btn btn-cancel">Cancelar</a>
-                <button type="submit" class="btn btn-save">Salvar Alterações</button>
-            </div>
-        </form>
+        </div>
     </div>
 
-</body>
-</html>
+    <!-- Script clonador adaptado para a tela de edição -->
+    <script>
+        document.getElementById('btn-add-ingrediente').addEventListener('click', function() {
+            const container = document.getElementById('container-ingredientes');
+            const novaLinha = document.createElement('div');
+            novaLinha.className = 'linha-ingrediente';
+            novaLinha.style.display = 'flex';
+            novaLinha.style.gap = '6px';
+            novaLinha.style.alignItems = 'center';
+            
+            novaLinha.innerHTML = `
+                <input type="text" name="ingredientes_nome[]" placeholder="Ingrediente" style="flex: 2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                <input type="text" name="ingredientes_qtd[]" placeholder="Qtd" style="flex: 0.8; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; text-align: center;">
+                <input type="text" name="ingredientes_unidade[]" placeholder="Medida" style="flex: 1.2; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px;">❌</button>
+            `;
+            container.appendChild(novaLinha);
+        });
+    </script>
+</x-app-layout>
