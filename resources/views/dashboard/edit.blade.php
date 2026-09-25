@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lançar Nova Receita - Sabormundo</title>
+    <title>Editar Receita - Sabormundo</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: #f4f6f9; color: #333; padding: 20px; }
@@ -17,60 +17,51 @@
         .btn { flex: 1; padding: 12px; border: none; border-radius: 4px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
         .btn-save { background-color: #ff6b6b; color: #fff; }
         .btn-cancel { background-color: #6c757d; color: #fff; }
-        .alert { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Lançar Nova Receita Mundial</h2>
+        <h2>Editar: {{ $receita->titulo }}</h2>
 
-        @if ($errors->any())
-            <div class="alert">
-                <ul style="margin-left: 20px;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form action="{{ route('dashboard.store') }}" method="POST">
+        <form action="{{ route('dashboard.update', $receita->id) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <div class="form-group">
                 <label for="titulo">Título da Receita</label>
-                <input type="text" name="titulo" id="titulo" placeholder="Ex: Tacos Al Pastor" required>
+                <input type="text" name="titulo" id="titulo" value="{{ $receita->titulo }}" required>
             </div>
 
             <div class="form-group">
-                <label for="pais_id">País da Culinária</label>
+                <label for="pais_id">País de Origem</label>
                 <select name="pais_id" id="pais_id" required>
-                    <option value="">Selecione o País...</option>
                     @foreach($paises as $p)
-                        <option value="{{ $p->id }}">{{ $p->nome }}</option>
+                        <option value="{{ $p->id }}" {{ $receita->pais_id == $p->id ? 'selected' : '' }}>
+                            {{ $p->nome }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="imagem">URL da Imagem (Opcional)</label>
-                <input type="text" name="imagem" id="imagem" placeholder="https://site.com">
+                <label for="imagem">URL da Imagem</label>
+                <input type="text" name="imagem" id="imagem" value="{{ $receita->imagem }}">
             </div>
 
             <div class="form-group">
                 <label for="ingredientes">Ingredientes</label>
-                <textarea name="ingredientes" id="ingredientes" rows="5" placeholder="Digite os ingredientes passo a passo..." required></textarea>
+                <textarea name="ingredientes" id="ingredientes" rows="5" required>{{ $receita->ingredientes }}</textarea>
             </div>
 
             <div class="form-group">
                 <label for="modo_preparo">Modo de Preparo</label>
-                <textarea name="modo_preparo" id="modo_preparo" rows="6" placeholder="Descreva as instruções de cozimento..." required></textarea>
+                <textarea name="modo_preparo" id="modo_preparo" rows="6" required>{{ $receita->modo_preparo }}</textarea>
             </div>
 
             <div class="btn-box">
                 <a href="{{ route('dashboard') }}" class="btn btn-cancel">Cancelar</a>
-                <button type="submit" class="btn btn-save">Gravar Receita</button>
+                <button type="submit" class="btn btn-save">Salvar Alterações</button>
             </div>
         </form>
     </div>

@@ -10,18 +10,22 @@ Route::get('/', function () {
 
 // 2. Protege a sua Dashboard de receitas para entrar APENAS quem estiver logado
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Listagem principal e Filtro por País
+    Route::get('/dashboard', [ReceitaController::class, 'index'])->name('dashboard');
     
-    // Lista as receitas na Dashboard
-    // Altere apenas o ->name() para 'dashboard' para alinhar com o motor do Breeze
-Route::get('/dashboard', [ReceitaController::class, 'index'])->name('dashboard');
-
-    
-    // Abre o formulário de cadastro
+    // Cadastro de Nova Receita
     Route::get('/dashboard/receitas/criar', [ReceitaController::class, 'create'])->name('dashboard.create');
-    
-    // Salva a receita nova no banco
     Route::post('/dashboard/receitas/salvar', [ReceitaController::class, 'store'])->name('dashboard.store');
+
+    // NOVAS ROTAS DE AÇÃO:
+    // Tela de Edição (passando o ID da receita na URL)
+    Route::get('/dashboard/receitas/{id}/editar', [ReceitaController::class, 'edit'])->name('dashboard.edit');
+    // Envio dos dados editados (Método PUT para atualização)
+    Route::put('/dashboard/receitas/{id}/atualizar', [ReceitaController::class, 'update'])->name('dashboard.update');
+    // Ação de Exclusão (Método DELETE por segurança)
+    Route::delete('/dashboard/receitas/{id}/excluir', [ReceitaController::class, 'destroy'])->name('dashboard.destroy');
 });
+
 
 // Mantém as rotas de autenticação automáticas do Breeze (Login, Registro, etc.)
 require __DIR__.'/auth.php';

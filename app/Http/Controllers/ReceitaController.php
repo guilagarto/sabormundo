@@ -3,29 +3,56 @@
 namespace App\Http\Controllers;
 
 use App\Models\Receita;
+use App\Models\Pais;
 use Illuminate\Http\Request;
 
 class ReceitaController extends Controller
 {
-    // Método que vai abrir a página inicial da Dashboard com a lista de receitas
-        public function index()
+    // Modificado: Lista os países ou filtra as receitas se um país for selecionado
+    public function index(Request $request)
     {
-        // Puxa apenas 15 receitas por página ao invés de todas
-        $receitas = Receita::paginate(15);
+        // Pega todos os países para montar o menu/filtros
+        $paises = Pais::all();
 
-        return view('dashboard.index', compact('receitas'));
+        // Se o usuário clicou em um país específico, filtra por ele
+        if ($request->has('pais_id')) {
+            $receitas = Receita::with('pais')
+                ->where('pais_id', $request->pais_id)
+                ->paginate(15);
+        } else {
+            // Se não clicou em nada, traz todas de forma paginada
+            $receitas = Receita::with('pais')->paginate(15);
+        }
+
+        return view('dashboard.index', compact('receitas', 'paises'));
     }
 
-    // Abre a página com o formulário de cadastro
-public function create()
+   public function create()
 {
-    return view('dashboard.create');
+    $paises = Pais::all(); // Puxa os países para o formulário de cadastro
+    return view('dashboard.create', compact('paises'));
 }
 
-// Recebe os dados do formulário e grava no banco de dados
-public function store(Request $request)
+
+    public function store(Request $request)
+    {
+        // (Mantenha o seu código atual da função store aqui...)
+    }
+    
+
+// ... (mantenha seus métodos index, create e store)
+
+// 1. Abre a tela de edição buscando os dados da receita atual e listando os países
+public function edit($id)
 {
-    // Validação rápida dos campos obrigatórios conforme seu banco de dados
+    $receita = Receita::findOrFail($id);
+    $paises = Pais::all(); // Necessário para o select de países no formulário
+    return view('dashboard.edit', compact('receita', 'paises'));
+}
+
+// 2. Salva as alterações da receita editada no banco
+public function update(Request $request, $id)
+{
     $request->validate([
         'titulo' => 'required|max:255',
         'ingredientes' => 'required',
@@ -33,22 +60,26 @@ public function store(Request $request)
         'pais_id' => 'required|integer',
     ]);
 
-    // Cria a receita usando o modelo Eloquent
-    $receita = new Receita();
+    $receita = Receita::findOrFail($id);
     $receita->titulo = $request->titulo;
-    
-    // Gerando um slug simples baseado no título para manter o padrão da tabela
     $receita->slug = \Illuminate\Support\Str::slug($request->titulo);
-    
     $receita->ingredientes = $request->ingredientes;
     $receita->modo_preparo = $request->modo_preparo;
     $receita->pais_id = $request->pais_id;
-    $receita->imagem = $request->imagem; // temporariamente como texto simples
-    
+    $receita->imagem = $request->imagem;
     $receita->save();
 
-    // Redireciona de volta para a lista com mensagem de sucesso
-    return redirect()->route('dashboard.index')->with('sucesso', 'Receita lançada com sucesso!');
+   return redirect()->route('dashboard')->with('sucesso', 'Receita lançada com sucesso!');
+
+}
+
+// 3. Exclui a receita do banco de dados de forma definitiva
+public function destroy($id)
+{
+    $receita = Receita::findOrFail($id);
+    $receita->delete();
+
+    return redirect()->back()->with('sucesso', 'Receita excluída com sucesso!');
 }
 
 }
