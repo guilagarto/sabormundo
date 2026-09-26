@@ -24,9 +24,14 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div>
-                            <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Origem / País</label>
-                            <input type="text" name="pais" value="{{ \$receita->pais }}" placeholder="Ex: Itália" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
-                        </div>
+                        <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Origem / País</label>
+                        <select name="pais" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white;">
+                            @foreach($paises as $p)
+                                <option value="{{ $p->nome }}" {{ $receita->pais == $p->nome ? 'selected' : '' }}>{{ $p->nome }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                         <div>
                             <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">URL da Imagem (Opcional)</label>
                             <input type="text" name="imagem" value="{{ \$receita->imagem }}" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">

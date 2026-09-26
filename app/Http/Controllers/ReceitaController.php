@@ -9,27 +9,16 @@ use Illuminate\Http\Request;
 class ReceitaController extends Controller
 {
     // Modificado: Lista os países ou filtra as receitas se um país for selecionado
-    public function index(Request $request)
-{
-    // REMOVA A LINHA: $paises = Pais::all();
-    
-    // Substitua por esta lista estática e limpa para alimentar o seu select HTML
-    $paises = [
-        ['id' => 'Brasil', 'nome' => 'Brasil'],
-        ['id' => 'Portugal', 'nome' => 'Portugal'],
-        ['id' => 'Italia', 'nome' => 'Itália'],
-        ['id' => 'Franca', 'nome' => 'França'],
-        ['id' => 'Japao', 'nome' => 'Japão'],
-    ];
+ public function index()
+    {
+        // Busca os países em ordem alfabética da tabela nova
+        $paises = \DB::table('paises')->orderBy('nome', 'asc')->get();
+        
+        // Pega as receitas com os ingredientes acoplados
+        $receitas = Receita::with('ingredientes')->orderBy('created_at', 'desc')->get();
 
-    // Transforma em coleção para manter compatibilidade caso o seu HTML use métodos do Eloquent
-    $paises = collect($paises)->map(fn($p) => (object)$p);
-
-    // Ajuste o restante da lógica de listagem de receitas que você já tinha abaixo
-    $receitas = Receita::with('ingredientes')->paginate(15);
-
-    return view('dashboard', compact('paises', 'receitas'));
-}
+        return view('dashboard', compact('paises', 'receitas'));
+    }
 
 
    public function create()
@@ -93,11 +82,14 @@ class ReceitaController extends Controller
 // ... (mantenha seus métodos index, create e store)
 
 // 1. Abre a tela de edição buscando os dados da receita atual e listando os países
-public function edit($id)
+  public function edit($id)
     {
-        // Busca a receita trazendo os ingredientes acoplados por relacionamento
         $receita = Receita::with('ingredientes')->findOrFail($id);
-        return view('dashboard.edit', compact('receita'));
+        
+        // Carrega os países para o select de edição também
+        $paises = \DB::table('paises')->orderBy('nome', 'asc')->get();
+
+        return view('dashboard.edit', compact('receita', 'paises'));
     }
 
 // 2. Salva as alterações da receita editada no banco
