@@ -90,7 +90,7 @@
 
             <div class="header-action">
                 <h2>Gerenciador de Culinária</h2>
-                <a href="{{ route('dashboard.create') }}" class="btn btn-add">+ Nova Receita</a>
+                <a href="{{ route('dashboard') }}" class="btn btn-add">+ Nova Receita</a>
 
             </div>
         </header>
@@ -110,7 +110,7 @@
 
         <!-- LISTAGEM DINÂMICA -->
         <ul class="recipe-list">
-            @forelse($receitas as $receita)
+            @forelse($receitasCadastradas as $receita)
             <li class="recipe-item">
                 <div class="recipe-info">
                     <span class="recipe-id">#{{ $receita->id }}</span>

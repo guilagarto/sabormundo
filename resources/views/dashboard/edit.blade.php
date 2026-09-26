@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Editar Receita: ') }} {{ \$receita->titulo }}
+            {{ __('Editar Receita: ') }} {{ \$receitasCadastradas->titulo }}
         </h2>
     </x-slot>
 
@@ -13,13 +13,13 @@
                     <a href="{{ route('dashboard') }}" style="color: #4f46e5; text-decoration: none; font-weight: bold; font-size: 14px;">← Voltar para a Lista</a>
                 </div>
 
-                <form method="POST" action="{{ route('receitas.update', \$receita->id) }}" style="display: flex; flex-direction: column; gap: 15px;">
+                <form method="POST" action="{{ route('receitas.update', \$receitasCadastradas->id) }}" style="display: flex; flex-direction: column; gap: 15px;">
                     @csrf
                     @method('PUT') <!-- Diretiva crucial do Laravel para aceitar rotas PUT -->
 
                     <div>
                         <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Título da Receita</label>
-                        <input type="text" name="titulo" value="{{ \$receita->titulo }}" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                        <input type="text" name="titulo" value="{{ \$receitasCadastradas->titulo }}" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -27,20 +27,20 @@
                         <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Origem / País</label>
                         <select name="pais" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: white;">
                             @foreach($paises as $p)
-                                <option value="{{ $p->nome }}" {{ $receita->pais == $p->nome ? 'selected' : '' }}>{{ $p->nome }}</option>
+                                <option value="{{ $p->nome }}" {{ $receitasCadastradas->pais == $p->nome ? 'selected' : '' }}>{{ $p->nome }}</option>
                             @endforeach
                         </select>
                     </div>
 
                         <div>
                             <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">URL da Imagem (Opcional)</label>
-                            <input type="text" name="imagem" value="{{ \$receita->imagem }}" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
+                            <input type="text" name="imagem" value="{{ \$receitasCadastradassCadastradas->imagem }}" placeholder="https://..." style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px;">
                         </div>
                     </div>
 
                     <div>
                         <label style="font-weight: 600; display: block; margin-bottom: 5px; color: #4b5563; font-size: 14px;">Modo de Preparo</label>
-                        <textarea name="modo_preparo" rows="5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; resize: none;">{{ \$receita->modo_preparo }}</textarea>
+                        <textarea name="modo_preparo" rows="5" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit; resize: none;">{{ \$receitasCadastradassCadastradas->modo_preparo }}</textarea>
                     </div>
 
                     <!-- CONTAINER DE INGREDIENTES EXISTENTES E DINÂMICOS -->

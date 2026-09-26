@@ -1,37 +1,49 @@
 <?php
 
+use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReceitaController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
-use App\Models\Receita;
 
-// 1. Altere a raiz para carregar a sua nova Home Page do escopo
-Route::get('/', function () {
-    $receitas = Receita::with('ingredientes')->orderBy('created_at', 'desc')->get();
-    return view('home', compact('receitas'));
+/*
+|--------------------------------------------------------------------------
+| 1. ROTAS DA ÁREA PÚBLICA (Usuário Final)
+|--------------------------------------------------------------------------
+*/
+
+// Página Inicial: Lista todos os países da Copa (Referência: Imagem 2)
+Route::get('/', [PublicController::class, 'index'])->name('public.home');
+
+// Cardápio do País: Exibe as receitas daquele país específico (Referência: Imagem 3)
+Route::get('/pais/{id}', [PublicController::class, 'paisReceitas'])->name('public.pais.receitas');
+
+// Detalhes da Receita: Exibe o modo de preparo e a tabela nutricional completa (Referência: Imagem 4)
+Route::get('/receita/{slug}', [PublicController::class, 'showReceita'])->name('public.receita.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| 2. ROTAS DA ÁREA ADMINISTRATIVA (Painel ADM)
+|--------------------------------------------------------------------------
+| Usamos o 'prefix' para que todas as URLs comecem com /adm (ex: /adm/receitas)
+| Usamos o 'name' para que os apelidos comecem com adm. (ex: route('adm.receitas.index'))
+*/
+Route::group(['prefix' => 'adm', 'as' => 'adm.'], function () {
+    
+    // Lista as receitas cadastradas e exibe os filtros por país
+    Route::get('/receitas', [ReceitaController::class, 'index'])->name('receitas.index');
+    
+    // Formulário de criação de nova receita
+    Route::get('/receitas/criar', [ReceitaController::class, 'create'])->name('receitas.create');
+    
+    // Processa o salvamento da nova receita no banco de dados
+    Route::post('/receitas', [ReceitaController::class, 'store'])->name('receitas.store');
+    
+    // Formulário de edição de uma receita existente
+    Route::get('/receitas/{id}/editar', [ReceitaController::class, 'edit'])->name('receitas.edit');
+    
+    // Processa a atualização dos dados da receita alterada
+    Route::put('/receitas/{id}', [ReceitaController::class, 'update'])->name('receitas.update');
+    
+    // Remove uma receita do banco de dados
+    Route::delete('/receitas/{id}', [ReceitaController::class, 'destroy'])->name('receitas.destroy');
 });
-
-// 2. Protege a sua Dashboard de receitas para entrar APENAS quem estiver logado
-// 2. Protege a sua Dashboard de receitas
-Route::middleware(['auth', 'verified'])->group(function () {
-    
-    // Listagem principal e filtro
-    Route::get('/dashboard', [ReceitaController::class, 'index'])->name('dashboard');
-    
-    // Telas de criação e salvamento de novas receitas
-    Route::get('/dashboard/receitas/criar', [ReceitaController::class, 'create'])->name('receitas.create');
-    Route::post('/dashboard/receitas/salvar', [ReceitaController::class, 'store'])->name('receitas.store');
-    
-    // Telas de edição e atualização de receitas existentes
-    Route::get('/dashboard/receitas/{id}/editar', [ReceitaController::class, 'edit'])->name('receitas.edit');
-    Route::put('/dashboard/receitas/{id}/atualizar', [ReceitaController::class, 'update'])->name('receitas.update');
-    
-    // Ação de exclusão
-    Route::delete('/dashboard/receitas/{id}/excluir', [ReceitaController::class, 'destroy'])->name('receitas.destroy');
-});
-// Rota pública do site (Acessível a qualquer visitante)
-Route::get('/', [ReceitaController::class, 'homePublica'])->name('home');
-
-
-// Mantém as rotas de autenticação automáticas do Breeze (Login, Registro, etc.)
-require __DIR__.'/auth.php';
