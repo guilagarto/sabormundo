@@ -45,7 +45,7 @@
         <div class="alert-erro">
             <strong>Atenção! Verifique as informações:</strong>
             <ul>
-                @foreach (\(errors->all() as\)error)
+                @foreach (errors->all() as error)
                     <li>{{ \$error }}</li>
                 @endforeach
             </ul>
@@ -60,8 +60,8 @@
             <div class="form-group">
                 <label for="pais_id">Seleção da Copa (País)</label>
                 <select name="pais_id" id="pais_id" required>
-                    @foreach(\(paises as\)pais)
-                        <option value="{{ \$pais->id }}" {{ (old('pais_id', \(receita->pais_id) ==\)pais->id) ? 'selected' : '' }}>
+                    @foreach(paises as pais)
+                        <option value="{{ \$pais->id }}" {{ old('pais_id', \(receita->pais_id) ==\)pais->id ? 'selected' : '' }}>
                             {{ \$pais->nome }}
                         </option>
                     @endforeach
@@ -86,12 +86,12 @@
             </div>
 
             <div id="container-linhas">
-                @foreach(\$receita->ingredients as \(index =>\)currentIngredient)
+                @foreach(\$receita->ingredients as index => currentIngredient)
                     <div class="linha-ingrediente item-ingrediente">
                         <div class="col-select">
                             <select name="ingredients[{{ \$index }}][id]" required>
-                                @foreach(\(ingredients as\)ing)
-                                    <option value="{{ \$ing->id }}" {{ \(currentIngredient->id ==\)ing->id ? 'selected' : '' }}>
+                                @foreach(ingredients as ing)
+                                    <option value="{{ \$ing->id }}" {{ currentIngredient->id == ing->id ? 'selected' : '' }}>
                                         {{ \$ing->nome }}
                                     </option>
                                 @endforeach

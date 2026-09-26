@@ -4,7 +4,6 @@
 
 @section('styles')
     <style>
-        /* Apenas regras de layout específicas para os formulários integrados */
         .form-group { margin-bottom: 20px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #1e293b; }
@@ -34,7 +33,6 @@
 @endsection
 
 @section('content')
-    <!-- Cabeçalho Local do Formulário -->
     <div class="header-context">
         <div>
             <h2>Nova Receita Mundial</h2>
@@ -43,68 +41,62 @@
         <a href="{{ route('adm.receitas.index') }}" class="btn-voltar">Voltar à Lista</a>
     </div>
 
-    <!-- Mensagens de Erro do Laravel -->
-    @if (\$errors->any())
+        @if ($errors->any())
         <div class="alert-erro">
             <strong>Atenção! Corrija os seguintes erros:</strong>
             <ul>
-                @foreach (errors->all() as error)
-                    <li>{{ \$error }}</li>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
     @endif
 
-    <!-- Formulário Oficial -->
+
     <form action="{{ route('adm.receitas.store') }}" method="POST">
         @csrf
 
         <div class="form-row">
-            <!-- Seleção de País -->
             <div class="form-group">
                 <label for="pais_id">Seleção da Copa (País)</label>
                 <select name="pais_id" id="pais_id" required>
-                    <option value="">-- Selecione o País --</option>
-                    @foreach(paises as pais)
-                        <option value="{{ \(pais->id }}" {{ old('pais_id') == \)pais->id ? 'selected' : '' }}>
-                            {{ \$pais->nome }}
-                        </option>
-                    @endforeach
-                </select>
+    <option value="">-- Selecione o País --</option>
+    @foreach($paises as $pais)
+        <option value="{{ $pais->id }}" {{ old('pais_id') == $pais->id ? 'selected' : '' }}>
+            {{ $pais->nome }}
+        </option>
+    @endforeach
+</select>
+
             </div>
 
-            <!-- Nome do Prato -->
             <div class="form-group">
                 <label for="nome">Nome do Prato Tradicional</label>
                 <input type="text" name="nome" id="nome" value="{{ old('nome') }}" required placeholder="Ex: Masgouf, Biryani...">
             </div>
         </div>
 
-        <!-- Modo de Preparo -->
         <div class="form-group">
             <label for="descricao">Modo de Preparo / Detalhes</label>
             <textarea name="descricao" id="descricao" rows="5" required placeholder="Descreva o passo a passo para a execução do prato...">{{ old('descricao') }}</textarea>
         </div>
 
-        <!-- Bloco de Ingredientes Dinâmicos -->
         <div class="secao-ingredientes">
             <div class="secao-topo">
                 <span class="secao-titulo">Composição de Ingredientes (Cálculo Nutricional)</span>
                 <button type="button" id="btn-add" class="btn-add">+ Adicionar Linha</button>
             </div>
 
-            <!-- Container das Linhas -->
             <div id="container-linhas">
-                
-                <!-- Linha Inicial Padrão (Índice 0) -->
                 <div class="linha-ingrediente item-ingrediente">
                     <div class="col-select">
-                        <select name="ingredients[0][id]" required>
-                            <option value="">-- Selecione o Alimento (TACO) --</option>
-                            @foreach(ingredients as ing)
-                                <option value="{{ ing->id "> ing->nome }}</option>
-                            @endforeach
-                        </select>
+                       <select name="ingredients[0][id]" required>
+    <option value="">-- Selecione o Alimento (TACO) --</option>
+    @foreach($ingredients as $ing)
+        <option value="{{ $ing->id }}">{{ $ing->nome }}</option>
+    @endforeach
+</select>
+
                     </div>
                     <div class="col-qtd">
                         <input type="number" step="0.01" name="ingredients[0][quantidade]" required placeholder="Qtd">
@@ -114,11 +106,9 @@
                     </div>
                     <button type="button" class="btn-remover" disabled style="opacity: 0.3;">🗑️</button>
                 </div>
-
             </div>
         </div>
 
-        <!-- Botão Salvar -->
         <div class="footer-form">
             <button type="submit" class="btn-salvar">Gravar e Salvar Receita</button>
         </div>
@@ -136,7 +126,7 @@
 
             novaLinha.innerHTML = `
                 <div class="col-select">
-                    <select name="ingredients[\${indiceAtual}][id]" required>
+                    <select name="ingredients[${indiceAtual}][id]" required>
                         <option value="">-- Selecione o Alimento (TACO) --</option>
                         @foreach($ingredients as $ing)
                             <option value="{{ $ing->id }}">{{ $ing->nome }}</option>
@@ -144,10 +134,10 @@
                     </select>
                 </div>
                 <div class="col-qtd">
-                    <input type="number" step="0.01" name="ingredients[\${indiceAtual}][quantidade]" required placeholder="Qtd">
+                    <input type="number" step="0.01" name="ingredients[${indiceAtual}][quantidade]" required placeholder="Qtd">
                 </div>
                 <div class="col-medida">
-                    <input type="text" name="ingredients[\${indiceAtual}][unidade_medida]" required placeholder="Ex: g, ml, xícara">
+                    <input type="text" name="ingredients[${indiceAtual}][unidade_medida]" required placeholder="Ex: g, ml, xícara">
                 </div>
                 <button type="button" onclick="removerLinha(this)" class="btn-remover">🗑️</button>
             `;
