@@ -9,15 +9,29 @@ use Illuminate\Http\Request;
 class ReceitaController extends Controller
 {
     // Modificado: Lista os países ou filtra as receitas se um país for selecionado
- public function index()
+    /**
+     * Exibe a Dashboard principal com filtro opcional de receitas.
+     */
+    public function index(\Illuminate\Http\Request $request)
     {
-        // Busca os países em ordem alfabética da tabela nova
+        // 1. Busca todos os países em ordem alfabética para alimentar os selects da tela
         $paises = \DB::table('paises')->orderBy('nome', 'asc')->get();
         
-        // Pega as receitas com os ingredientes acoplados
-        $receitas = Receita::with('ingredientes')->orderBy('created_at', 'desc')->get();
+        // 2. Captura o país selecionado no filtro (se houver)
+        $paisFiltro = $request->get('filtrar_pais');
 
-        return view('dashboard', compact('paises', 'receitas'));
+        // 3. Inicia a busca de receitas trazendo os ingredientes acoplados
+        $query = Receita::with('ingredientes')->orderBy('created_at', 'desc');
+
+        // 4. Se o usuário escolheu um país específico no filtro, aplica a cláusula WHERE
+        if (!empty($paisFiltro)) {
+            $query->where('pais', $paisFiltro);
+        }
+
+        $receitas = $query->get();
+
+        // Retorna a view enviando os dados e mantendo o país ativo no filtro
+        return view('dashboard', compact('paises', 'receitas', 'paisFiltro'));
     }
 
 
