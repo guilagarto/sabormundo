@@ -37,6 +37,16 @@ Route::get('/sobre', function () {
 })->name('public.sobre');
 
 Route::post('/newsletter/salvar', [App\Http\Controllers\NutricaoController::class, 'salvarNewsletter'])->name('public.newsletter.salvar');
+// Rota para a página interna de leitura completa do artigo
+Route::get('/guia-nutricional/{slug}', [App\Http\Controllers\NutricaoController::class, 'exibirPostCompleto'])->name('public.guia.show');
+
+//Route::get('/guia-nutricional', function () {
+  //  return view('public.guianutricional'); 
+//})->name('public.guianutricional'); 
+// Altere a rota antiga por esta linha direcionada ao Controller
+Route::get('/guia-nutricional', [App\Http\Controllers\NutricaoController::class, 'exibirGuia'])->name('public.guianutricional');
+// Nome alterado para bater com o menu
+ // Ajuste o nome da rota se o seu cabeçalho usar outro apelido
 
 /*
 |--------------------------------------------------------------------------

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Receita;
 use App\Models\LeadNewsletter;
+use App\Models\Post;
 
 class NutricaoController extends Controller
 {
@@ -159,4 +160,44 @@ class NutricaoController extends Controller
     // Retorna para a página anterior com uma mensagem de sucesso
     return redirect()->back()->with('success', 'Inscrição realizada com sucesso! Obrigado por fazer parte do Mundo Sabor.');
 }
+public function exibirGuia(Request $request)
+{
+    // Captura a categoria da URL (ex: ?categoria=Nutricao+Pratica)
+    $categoriaSelecionada = $request->query('categoria');
+
+    // Query base de posts ordenada pelos mais recentes
+    $queryPosts = Post::orderBy('created_at', 'desc');
+
+    // Se o usuário selecionou uma categoria específica, aplica o filtro WHERE no banco
+    if (!empty($categoriaSelecionada)) {
+        $queryPosts->where('categoria', $categoriaSelecionada);
+    }
+
+    // Pega o primeiro post do resultado filtrado para o Banner Principal
+    $postDestaque = (clone $queryPosts)->first();
+
+    // Pega os outros posts seguintes da listagem filtrada
+    $outrosPosts = (clone $queryPosts)->skip(1)->take(6)->get();
+
+    // Retorna a view injetando as variáveis e a categoria ativa para marcar o botão
+    return view('public.guianutricional', compact('postDestaque', 'outrosPosts', 'categoriaSelecionada'));
+}
+public function exibirPostCompleto($slug)
+{
+    // Busca o post pelo slug ou retorna erro 404 se não existir
+    $post = Post::where('slug', $slug)->firstOrFail();
+
+    // Incrementa o contador de visualizações de forma silenciosa
+    $post->increment('visualizacoes');
+
+    // Busca outros posts recentes para sugerir na barra lateral (sidebar)
+    $postsRecentes = Post::where('id', '!=', $post->id)
+                         ->orderBy('created_at', 'desc')
+                         ->take(3)
+                         ->get();
+
+    return view('public.post-leitura', compact('post', 'postsRecentes'));
+}
+
+
 }
