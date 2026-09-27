@@ -35,9 +35,12 @@
             <a href="{{ route('public.home') }}" class="admin-logo">🌍 Mundo Sabor ADM</a>
             
             <!-- Links do Menu: Expansível para novas abas futuramente -->
+                        <!-- Links do Menu: Expansível para novas abas -->
             <nav class="admin-menu">
                 <a href="{{ route('adm.receitas.index') }}" class="menu-link {{ request()->routeIs('adm.receitas.*') ? 'active' : '' }}">🍲 Receitas</a>
+                <a href="{{ route('adm.paises.index') }}" class="menu-link {{ request()->routeIs('adm.paises.*') ? 'active' : '' }}">🏳️ Países</a>
             </nav>
+
         </div>
 
         <!-- SESSÃO DO USUÁRIO LOGADO -->

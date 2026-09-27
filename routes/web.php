@@ -20,6 +20,7 @@ Route::get('/pais/{id}', [PublicController::class, 'paisReceitas'])->name('publi
 
 // Detalhes da Receita: Exibe o modo de preparo e a tabela nutricional completa (Referência: Imagem 4)
 Route::get('/receita/{slug}', [PublicController::class, 'showReceita'])->name('public.receita.show');
+Route::post('/calculadora/buscar-receitas', [PublicController::class, 'buscarPorIngredientes'])->name('public.calculadora.buscar');
 
 
 /*
@@ -54,6 +55,7 @@ Route::group(['prefix' => 'adm', 'as' => 'adm.'], function () {
 Route::get('/', [PublicController::class, 'index'])->name('public.home');
 Route::get('/pais/{id}', [PublicController::class, 'paisReceitas'])->name('public.pais.receitas');
 Route::get('/receita/{slug}', [PublicController::class, 'showReceita'])->name('public.receita.show');
+Route::get('/calculadora', [PublicController::class, 'calculadora'])->name('public.calculadora');
 
 /*
 |--------------------------------------------------------------------------
@@ -76,4 +78,8 @@ Route::group(['prefix' => 'adm', 'as' => 'adm.', 'middleware' => 'auth'], functi
     Route::get('/receitas/{id}/editar', [ReceitaController::class, 'edit'])->name('receitas.edit');
     Route::put('/receitas/{id}', [ReceitaController::class, 'update'])->name('receitas.update');
     Route::delete('/receitas/{id}', [ReceitaController::class, 'destroy'])->name('receitas.destroy');
+     Route::get('/paises', [App\Http\Controllers\PaisController::class, 'index'])->name('paises.index');
+    Route::get('/paises/{id}/editar', [App\Http\Controllers\PaisController::class, 'edit'])->name('paises.edit');
+    Route::put('/paises/{id}', [App\Http\Controllers\PaisController::class, 'update'])->name('paises.update');
 });
+    

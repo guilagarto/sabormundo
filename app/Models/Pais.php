@@ -16,6 +16,7 @@ class Pais extends Model
     protected $fillable = [
         'nome',
         'bandeira',
+        'descricao',
     ];
 
     /**

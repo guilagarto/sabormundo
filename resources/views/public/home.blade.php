@@ -1,63 +1,40 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mundo Sabor - Seleções da Copa</title>
+@extends('layouts.public')
+
+@section('title', 'Culinária das Seleções Mundiais')
+
+@section('styles')
     <style>
-        /* CSS Puro de Alta Performance */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; }
-        .navbar { background-color: #1e293b; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .navbar .logo { font-size: 22px; font-weight: 800; color: #38bdf8; text-decoration: none; letter-spacing: 0.5px; }
-        .navbar .btn-adm { text-decoration: none; color: #f8fafc; background-color: #334155; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; transition: background 0.2s; }
-        .navbar .btn-adm:hover { background-color: #475569; }
+        .home-header { text-align: center; margin: 40px 0 50px 0; }
+        .home-header h1 { font-size: 38px; font-weight: 800; margin-bottom: 12px; color: #ffffff; letter-spacing: -0.5px; }
+        .home-header p { font-size: 16px; color: #94a3b8; max-width: 600px; margin: 0 auto; line-height: 1.6; }
         
-        .container { max-width: 1000px; margin: 50px auto; padding: 0 20px; text-align: center; }
-        .hero h1 { font-size: 36px; font-weight: 800; margin-bottom: 10px; color: #ffffff; }
-        .hero p { font-size: 16px; color: #94a3b8; margin-bottom: 40px; }
-        
-        /* Grid das Seleções / Países */
-        .countries-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
-        .country-card { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #1e293b; border: 1px solid #334155; padding: 30px 20px; border-radius: 12px; text-decoration: none; color: #ffffff; font-weight: 700; font-size: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: transform 0.2s, border-color 0.2s; }
+        /* Grid das Seleções da Copa */
+        .countries-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .country-card { background-color: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 25px 15px; text-align: center; text-decoration: none; color: #ffffff; transition: transform 0.2s, border-color 0.2s, background-color 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .country-card:hover { transform: translateY(-4px); border-color: #38bdf8; background-color: #243249; }
-        .country-flag { font-size: 40px; margin-bottom: 15px; }
+        .country-flag { font-size: 42px; margin-bottom: 12px; display: block; line-height: 1; }
+        .country-name { font-size: 16px; font-weight: 700; color: #f8fafc; }
     </style>
-</head>
-<body>
+@endsection
 
-    <!-- Header / Navbar (Referência: Imagem 2 do escopo) -->
-    <nav class="navbar">
-        <a href="{{ route('public.home') }}" class="logo">🌍 Mundo Sabor</a>
-        <a href="{{ route('adm.receitas.index') }}" class="btn-adm">Painel Administrador</a>
-    </nav>
-
-    <div class="container">
-        
-        <!-- Seção Hero -->
-        <div class="hero">
-            <h1>Culinária das Seleções Mundiais</h1>
-            <p>Escolha um dos países abaixo para explorar as receitas tradicionais e conferir sua tabela nutricional completa.</p>
-        </div>
-
-        <!-- Grid de Países vindos do Banco Sabor_db -->
-        <div class="countries-grid">
-            @forelse($paises as $pais)
-               <a href="{{ route('public.pais.receitas', $pais->id) }}" class="country-card">
-    <!-- Exibe a Bandeira Oficial -->
-    <div class="country-flag">{{ $pais->bandeira ?? '🏳️' }}</div>
-    
-    <!-- EXIBE O NOME DO PAÍS LOGO ABAIXO -->
-    <div class="country-name" style="margin-top: 10px; font-weight: 700;">{{ $pais->nome }}</div>
-</a>
-
-            @empty
-                <div style="grid-column: span 4; color: #94a3b8; padding: 40px;">
-                    Nenhum país cadastrado no banco ainda. Certifique-se de rodar o seeder.
-                </div>
-            @endforelse
-        </div>
-
+@section('content')
+    <!-- Cabeçalho de Introdução -->
+    <div class="home-header">
+        <h1>Culinária das Seleções Mundiais</h1>
+        <p>Escolha um dos países participantes da Copa do Mundo para explorar as receitas tradicionais e conferir as tabelas nutricionais completas (TACO).</p>
     </div>
 
-</body>
-</html>
+    <!-- Grid Dinâmico dos 48 Países -->
+    <div class="countries-grid">
+        @forelse($paises as $pais)
+            <a href="{{ route('public.pais.receitas', $pais->id) }}" class="country-card">
+                <span class="country-flag">{{ $pais->bandeira ?? '🏳️' }}</span>
+                <span class="country-name">{{ $pais->nome }}</span>
+            </a>
+        @empty
+            <div style="grid-column: 1/-1; background-color: #1e293b; border: 1px dashed #334155; padding: 40px; text-align: center; color: #94a3b8; border-radius: 12px;">
+                Nenhum país localizado no banco sabor_db.
+            </div>
+        @endforelse
+    </div>
+@endsection

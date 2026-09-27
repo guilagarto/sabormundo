@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Ingredient;
 use App\Models\Pais;
 use App\Models\Receita;
 use Illuminate\Http\Request;
@@ -52,4 +52,63 @@ class PublicController extends Controller
 
         return view('public.receita', compact('receita', 'tabelaNutricional'));
     }
+  public function calculadora()
+    {
+        $ingredients = Ingredient::orderBy('nome', 'asc')->get();
+        return view('public.calculadora', compact('ingredients'));
+    }
+
+    /**
+     * Processa o cruzamento inteligente: Busca receitas compatíveis com os ingredientes que o usuário possui
+     */
+    public function buscarPorIngredientes(Request $request)
+    {
+        $ingredientesPossuidos = $request->input('ingredients', []);
+
+        if (empty($ingredientesPossuidos)) {
+            return response()->json(['receitas_completas' => [], 'receitas_quase_la' => []]);
+        }
+
+        // Busca todas as receitas carregando os ingredientes relacionados
+        $receitas = Receita::with(['ingredients', 'pais'])->get();
+
+        $receitasCompletas = [];
+        $receitasQuaseLa = [];
+
+        foreach ($receitas as $receita) {
+            $idIngredientesReceita = $receita->ingredients->pluck('id')->toArray();
+            
+            // Verifica quais ingredientes da receita o usuário NÃO possui
+            $ingredientesFaltantesIds = array_diff($idIngredientesReceita, $ingredientesPossuidos);
+            $totalFaltantes = count($ingredientesFaltantesIds);
+
+            if ($totalFaltantes === 0) {
+                // Usuário tem todos os ingredientes!
+                $receitasCompletas[] = [
+                    'nome' => $receita->nome,
+                    'slug' => $receita->slug,
+                    'pais' => $receita->pais->nome ?? 'Mundial',
+                    'bandeira' => $receita->pais->bandeira ?? '🌍'
+                ];
+            } elseif ($totalFaltantes <= 2) {
+                // Falta apenas 1 ou 2 ingredientes para conseguir fazer o prato
+                $nomesFaltantes = Ingredient::whereIn('id', $ingredientesFaltantesIds)->pluck('nome')->toArray();
+                
+                $receitasQuaseLa[] = [
+                    'nome' => $receita->nome,
+                    'slug' => $receita->slug,
+                    'pais' => $receita->pais->nome ?? 'Mundial',
+                    'bandeira' => $receita->pais->bandeira ?? '🌍',
+                    'faltando' => $nomesFaltantes
+                ];
+            }
+        }
+
+        return response()->json([
+            'receitas_completas' => $receitasCompletas,
+            'receitas_quase_la' => $receitasQuaseLa
+        ]);
+    }
+
+
 }
