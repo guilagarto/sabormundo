@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\NutricaoController;
 use App\Models\Receita;
+use App\Http\Controllers\PostAdmController;
 /*
 |--------------------------------------------------------------------------
 | 1. ROTAS DA ÁREA PÚBLICA (Usuário Final)
@@ -74,6 +75,10 @@ Route::group(['prefix' => 'adm', 'as' => 'adm.'], function () {
     
     // Remove uma receita do banco de dados
     Route::delete('/receitas/{id}', [ReceitaController::class, 'destroy'])->name('receitas.destroy');
+
+    Route::get('/posts/create', [PostAdmController::class, 'create'])->name('posts.create');
+    Route::post('/posts/store', [PostAdmController::class, 'store'])->name('posts.store');
+
 });
 
 

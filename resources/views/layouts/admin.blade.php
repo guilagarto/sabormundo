@@ -39,6 +39,8 @@
             <nav class="admin-menu">
                 <a href="{{ route('adm.receitas.index') }}" class="menu-link {{ request()->routeIs('adm.receitas.*') ? 'active' : '' }}">🍲 Receitas</a>
                 <a href="{{ route('adm.paises.index') }}" class="menu-link {{ request()->routeIs('adm.paises.*') ? 'active' : '' }}">🏳️ Países</a>
+                <a href="{{ route('adm.posts.create') }}" class="menu-link {{ request()->routeIs('adm.posts.*') ? 'active' : '' }}">✍️ Escrever Post</a>
+
             </nav>
 
         </div>
