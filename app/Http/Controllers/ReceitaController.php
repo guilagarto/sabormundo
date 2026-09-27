@@ -44,48 +44,54 @@ class ReceitaController extends Controller
     /**
      * Processa e salva a nova receita com seus ingredientes associados.
      */
-    public function store(Request $request)
+       public function store(Request $request)
     {
-        // 1. Validação estrita
         $validated = $request->validate([
             'pais_id'     => 'required|exists:paises,id',
             'nome'        => 'required|string|max:255',
             'descricao'   => 'required|string',
+            'origem'      => 'nullable|string|max:255',
+            'video_url'   => 'nullable|url',
+            'imagen'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Max 2MB seguro
             'ingredients' => 'required|array|min:1',
             'ingredients.*.id' => 'required|exists:ingredients,id',
             'ingredients.*.quantidade' => 'required|numeric|min:0.01',
             'ingredients.*.unidade_medida' => 'required|string|max:50',
         ]);
 
-        // 2. Geração automática do Slug com o helper do Laravel
-        $slug = Str::slug($validated['nome']);
-        
-        // Garante que o slug seja único se houver pratos com o mesmo nome
-        $count = Receita::where('slug', 'LIKE', "{$slug}%")->count();
-        if ($count > 0) {
-            $slug = $slug . '-' . ($count + 1);
+        // Processamento do Upload da Foto Real
+        $nomeImagem = null;
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            // Cria um nome exclusivo baseado no tempo para não sobrescrever arquivos
+            $nomeImagem = time() . '_' . Str::slug($validated['nome']) . '.' . $file->getClientOriginalExtension();
+            // Move fisicamente para a pasta pública oficial do projeto (Leve e performático)
+            $file->move(public_path('uploads/receitas'), $nomeImagem);
         }
 
-        // 3. Persistência da Receita Base
+        $slug = Str::slug($validated['nome']);
+        $count = Receita::where('slug', 'LIKE', "{$slug}%")->count();
+        if ($count > 0) { $slug = $slug . '-' . ($count + 1); }
+
         $receita = Receita::create([
             'pais_id'   => $validated['pais_id'],
             'nome'      => $validated['nome'],
             'slug'      => $slug,
             'descricao' => $validated['descricao'],
+            'origem'    => $validated['origem'],
+            'video_url' => $validated['video_url'],
+            'imagen'    => $nomeImagem, // Salva o nome do arquivo no banco
         ]);
 
-        // 4. Mapeamento e Salvamento dos ingredientes na tabela pivô
         $syncData = [];
         foreach ($validated['ingredients'] as $item) {
-            $syncData[$item['id']] = [
-                'quantidade'     => $item['quantidade'],
-                'unidade_medida' => $item['unidade_medida']
-            ];
+            $syncData[$item['id']] = ['quantidade' => $item['quantidade'], 'unidade_medida' => $item['unidade_medida']];
         }
         $receita->ingredients()->attach($syncData);
 
-        return redirect()->route('adm.receitas.index')->with('success', 'Receita cadastrada com absoluto sucesso!');
+        return redirect()->route('adm.receitas.index')->with('success', 'Receita e foto gravados com absoluto sucesso!');
     }
+
 
     /**
      * Exibe o formulário de edição pré-populado.
@@ -103,7 +109,7 @@ class ReceitaController extends Controller
     /**
      * Processa a atualização da receita e sincroniza novos ingredientes.
      */
-    public function update(Request $request, $id)
+        public function update(Request $request, $id)
     {
         $receita = Receita::findOrFail($id);
 
@@ -111,22 +117,42 @@ class ReceitaController extends Controller
             'pais_id'     => 'required|exists:paises,id',
             'nome'        => 'required|string|max:255',
             'descricao'   => 'required|string',
+            'origem'      => 'nullable|string|max:255',
+            'video_url'   => 'nullable|url',
+            'imagen'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'ingredients' => 'required|array|min:1',
             'ingredients.*.id' => 'required|exists:ingredients,id',
             'ingredients.*.quantidade' => 'required|numeric|min:0.01',
             'ingredients.*.unidade_medida' => 'required|string|max:50',
         ]);
 
-        // Atualiza os dados principais e refaz o slug baseado no novo nome caso mude
+        // Se o administrador enviou uma nova foto
+        if ($request->hasFile('imagen')) {
+            $file = $request->file('imagen');
+            $nomeImagem = time() . '_' . Str::slug($validated['nome']) . '.' . $file->getClientOriginalExtension();
+            
+            // Move a nova imagem para a pasta física
+            $file->move(public_path('uploads/receitas'), $nomeImagem);
+
+            // Deleta de forma limpa a foto antiga da pasta caso ela exista para não acumular lixo no servidor
+            if ($receita->imagen && file_exists(public_path('uploads/receitas/' . $receita->imagen))) {
+                @unlink(public_path('uploads/receitas/' . $receita->imagen));
+            }
+
+            $receita->imagen = $nomeImagem;
+        }
+
+        // Atualiza os dados textuais principais
         $receita->update([
             'pais_id'   => $validated['pais_id'],
             'nome'      => $validated['nome'],
             'slug'      => Str::slug($validated['nome']),
             'descricao' => $validated['descricao'],
+            'origem'    => $validated['origem'],
+            'video_url' => $validated['video_url'],
         ]);
 
-        // O método 'sync' remove do banco os ingredientes antigos que saíram da lista 
-        // e adiciona os novos/modificados automaticamente de uma só vez
+        // Sincroniza os insumos alimentares da tabela pivô
         $syncData = [];
         foreach ($validated['ingredients'] as $item) {
             $syncData[$item['id']] = [
@@ -136,8 +162,9 @@ class ReceitaController extends Controller
         }
         $receita->ingredients()->sync($syncData);
 
-        return redirect()->route('adm.receitas.index')->with('success', 'Receita atualizada perfeitamente!');
+        return redirect()->route('adm.receitas.index')->with('success', 'Receita e foto atualizados perfeitamente!');
     }
+
 
     /**
      * Remove a receita e todas as suas associações automaticamente por causa da constraint Cascade.

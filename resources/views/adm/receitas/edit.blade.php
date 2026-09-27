@@ -41,18 +41,11 @@
         <a href="{{ route('adm.receitas.index') }}" class="btn-voltar">Cancelar</a>
     </div>
 
-    @if (\$errors->any())
-        <div class="alert-erro">
-            <strong>Atenção! Verifique as informações:</strong>
-            <ul>
-                @foreach (errors->all() as error)
-                    <li>{{ \$error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <!-- Mensagens de Erro Corrigidas -->
+   
 
-    <form action="{{ route('adm.receitas.update', \$receita->id) }}" method="POST">
+    <form action="{{ route('adm.receitas.update', $receita->id) }}" method="POST" enctype="multipart/form-data">
+
         @csrf
         @method('PUT')
 
@@ -60,23 +53,44 @@
             <div class="form-group">
                 <label for="pais_id">Seleção da Copa (País)</label>
                 <select name="pais_id" id="pais_id" required>
-                    @foreach(paises as pais)
-                        <option value="{{ \$pais->id }}" {{ old('pais_id', \(receita->pais_id) ==\)pais->id ? 'selected' : '' }}>
-                            {{ \$pais->nome }}
-                        </option>
-                    @endforeach
+                    @foreach($paises as $pais)
+    <option value="{{ $pais->id }}" {{ old('pais_id', $receita->pais_id) == $pais->id ? 'selected' : '' }}>
+        {{ $pais->nome }}
+    </option>
+@endforeach
+
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="nome">Nome do Prato</label>
-                <input type="text" name="nome" id="nome" value="{{ old('nome', \$receita->nome) }}" required>
+                <input type="text" name="nome" id="nome" value="{{ old('nome', $receita->nome) }}" required>
             </div>
         </div>
 
         <div class="form-group">
             <label for="descricao">Modo de Preparo</label>
-            <textarea name="descricao" id="descricao" rows="5" required>{{ old('descricao', \$receita->descricao) }}</textarea>
+            <textarea name="descricao" id="descricao" rows="5" required>{{ old('descricao', $receita->descricao) }}</textarea>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="origem">Cidade / Região de Origem</label>
+                <input type="text" name="origem" id="origem" value="{{ old('origem', $receita->origem) }}" placeholder="Ex: Bagdá, Minas Gerais...">
+            </div>
+
+            <div class="form-group">
+                <label for="video_url">Link do Vídeo no YouTube</label>
+                <input type="text" name="video_url" id="video_url" value="{{ old('video_url', $receita->video_url) }}" placeholder="Ex: https://youtube.com...">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="imagen">Alterar Foto do Prato (Deixe em branco para manter a atual)</label>
+            <input type="file" name="imagen" id="imagen" accept="image/*" style="padding: 6px;">
+            @if($receita->imagen)
+                <p style="margin: 4px 0 0 0; font-size: 12px; color: #10b981;">Imagem atual: {{ $receita->imagen }}</p>
+            @endif
         </div>
 
         <div class="secao-ingredientes">
@@ -86,22 +100,29 @@
             </div>
 
             <div id="container-linhas">
-                @foreach(\$receita->ingredients as index => currentIngredient)
+                @foreach($receita->ingredients as $index => $currentIngredient)
+
                     <div class="linha-ingrediente item-ingrediente">
                         <div class="col-select">
-                            <select name="ingredients[{{ \$index }}][id]" required>
-                                @foreach(ingredients as ing)
-                                    <option value="{{ \$ing->id }}" {{ currentIngredient->id == ing->id ? 'selected' : '' }}>
-                                        {{ \$ing->nome }}
+                           <select name="ingredients[{{ $index }}][id]" required>
+
+                                @foreach($ingredients as $ing)
+
+                                   <option value="{{ $ing->id }}" {{ $currentIngredient->id == $ing->id ? 'selected' : '' }}>
+
+                                        {{ $ing->nome }}
+
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="col-qtd">
-                            <input type="number" step="0.01" name="ingredients[{{ \(index }}][quantidade]" value="{{ \)currentIngredient->pivot->quantidade }}" required>
+                            <input type="number" step="0.01" name="ingredients[{{ $index }}][quantidade]" value="{{ $currentIngredient->pivot->quantidade }}" required>
+
                         </div>
                         <div class="col-medida">
-                            <input type="text" name="ingredients[{{ \(index }}][unidade_medida]" value="{{ \)currentIngredient->pivot->unidade_medida }}" required>
+                           <input type="text" name="ingredients[{{ $index }}][unidade_medida]" value="{{ $currentIngredient->pivot->unidade_medida }}" required>
+
                         </div>
                         <button type="button" onclick="removerLinha(this)" class="btn-remover">🗑️</button>
                     </div>
@@ -117,7 +138,7 @@
 
 @section('scripts')
     <script>
-        let indiceAtual = {{ \$receita->ingredients->count() }};
+        let indiceAtual = {{ $receita->ingredients->count() }};
 
         document.getElementById('btn-add').addEventListener('click', function() {
             const container = document.getElementById('container-linhas');

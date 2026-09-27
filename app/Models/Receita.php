@@ -17,20 +17,16 @@ class Receita extends Model
         'nome',
         'slug',
         'descricao',
-        'imagen',
+        'origem',     // Novo campo
+        'video_url',  // Novo campo
+        'imagen',     // Campo de foto
     ];
 
-    /**
-     * Relacionamento: A receita pertence a um País específico (N:1).
-     */
     public function pais(): BelongsTo
     {
         return $this->belongsTo(Pais::class, 'pais_id');
     }
 
-    /**
-     * Relacionamento: A receita possui muitos ingredientes do catálogo (N:N).
-     */
     public function ingredients(): BelongsToMany
     {
         return $this->belongsToMany(Ingredient::class, 'recipe_ingredients')
@@ -39,33 +35,39 @@ class Receita extends Model
     }
 
     /**
-     * REGRA DE NEGÓCIO MODERNA: Calcula os valores nutricionais totais da receita.
-     * Soma o peso proporcional de cada ingrediente cadastrado com base na referência de 100g.
+     * MUTATOR MODERNO: Pega qualquer link normal do YouTube enviado pelo ADM 
+     * e o converte no código de EMBED correto para rodar direto na página.
+     */
+    protected function videoUrl(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                if (empty($value)) return null;
+                
+                // Trata links formato ://youtube.com ou youtu.be/ID
+                preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $value, $match);
+                
+                return isset($match[1]) ? 'https://youtube.com' . $match[1] : $value;
+            }
+        );
+    }
+
+    /**
+     * Calcula os valores nutricionais totais somados
      */
     protected function valoresNutricionais(): Attribute
     {
         return Attribute::make(
             get: function () {
-                $totais = [
-                    'calorias'     => 0.00,
-                    'carboidratos' => 0.00,
-                    'proteinas'    => 0.00,
-                    'gorduras'     => 0.00,
-                    'sodio'        => 0.00,
-                ];
-
-                // Varre os ingredientes associados e calcula a regra de três
+                $totais = ['calorias' => 0, 'carboidratos' => 0, 'proteinas' => 0, 'gorduras' => 0, 'sodio' => 0];
                 foreach ($this->ingredients as $ingredient) {
-                    $pesoUtilizado = (float) $ingredient->pivot->quantidade;
-
-                    // Cálculo: (Valor do nutriente por 100g / 100) * Peso colocado na receita
-                    $totais['calorias']     += ($ingredient->calorias / 100) * $pesoUtilizado;
-                    $totais['carboidratos'] += ($ingredient->carboidratos / 100) * $pesoUtilizado;
-                    $totais['proteinas']    += ($ingredient->proteinas / 100) * $pesoUtilizado;
-                    $totais['gorduras']     += ($ingredient->gorduras / 100) * $pesoUtilizado;
-                    $totais['sodio']        += ($ingredient->sodio / 100) * $pesoUtilizado;
+                    $peso = (float) $ingredient->pivot->quantidade;
+                    $totais['calorias']     += ($ingredient->calorias / 100) * $peso;
+                    $totais['carboidratos'] += ($ingredient->carboidratos / 100) * $peso;
+                    $totais['proteinas']    += ($ingredient->proteinas / 100) * $peso;
+                    $totais['gorduras']     += ($ingredient->gorduras / 100) * $peso;
+                    $totais['sodio']        += ($ingredient->sodio / 100) * $peso;
                 }
-
                 return $totais;
             }
         );

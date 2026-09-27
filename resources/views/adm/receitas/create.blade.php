@@ -53,7 +53,8 @@
     @endif
 
 
-    <form action="{{ route('adm.receitas.store') }}" method="POST">
+    <form action="{{ route('adm.receitas.store') }}" method="POST" enctype="multipart/form-data">
+
         @csrf
 
         <div class="form-row">
@@ -80,6 +81,25 @@
             <label for="descricao">Modo de Preparo / Detalhes</label>
             <textarea name="descricao" id="descricao" rows="5" required placeholder="Descreva o passo a passo para a execução do prato...">{{ old('descricao') }}</textarea>
         </div>
+                <!-- Novos Campos Integrados (Origem, Vídeo e Upload) -->
+        <div class="form-row" style="margin-top: 20px;">
+            <div class="form-group">
+                <label for="origem">Cidade / Região de Origem (Opcional)</label>
+                <input type="text" name="origem" id="origem" value="{{ old('origem') }}" placeholder="Ex: Bagdá, Minas Gerais...">
+            </div>
+
+            <div class="form-group">
+                <label for="video_url">Link do Vídeo no YouTube</label>
+                <input type="text" name="video_url" id="video_url" value="{{ old('video_url') }}" placeholder="Ex: https://youtube.com...">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            <label for="imagen">Foto Real do Prato Tradicional</label>
+            <input type="file" name="imagen" id="imagen" accept="image/*" style="padding: 6px;">
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">Formatos aceitos: JPG, PNG, WEBP. Tamanho máximo recomendado: 2MB.</p>
+        </div>
+
 
         <div class="secao-ingredientes">
             <div class="secao-topo">
