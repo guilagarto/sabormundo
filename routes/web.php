@@ -5,7 +5,8 @@ use App\Http\Controllers\ReceitaController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-
+use App\Http\Controllers\NutricaoController;
+use App\Models\Receita;
 /*
 |--------------------------------------------------------------------------
 | 1. ROTAS DA ÁREA PÚBLICA (Usuário Final)
@@ -21,7 +22,21 @@ Route::get('/pais/{id}', [PublicController::class, 'paisReceitas'])->name('publi
 // Detalhes da Receita: Exibe o modo de preparo e a tabela nutricional completa (Referência: Imagem 4)
 Route::get('/receita/{slug}', [PublicController::class, 'showReceita'])->name('public.receita.show');
 Route::post('/calculadora/buscar-receitas', [PublicController::class, 'buscarPorIngredientes'])->name('public.calculadora.buscar');
+// Rota para exibir a página inicial do Blog Nutricional (onde fica o formulário)
+Route::get('/blognutricional', function () {
+    return view('blognutricional'); // Certifique-se de que o arquivo se chama blognutricional.blade.php
+})->name('public.blognutricional');
 
+// Rota POST que processa o formulário (aquela que criamos na etapa anterior)
+Route::post('/blognutricional/calcular', [App\Http\Controllers\NutricaoController::class, 'calcular'])->name('nutricao.calcular');
+Route::get('/sobre', function () {
+    // Conta quantas linhas existem na tabela de receitas em tempo real
+    $totalReceitas = Receita::count(); 
+    
+    return view('public.sobre', compact('totalReceitas'));
+})->name('public.sobre');
+
+Route::post('/newsletter/salvar', [App\Http\Controllers\NutricaoController::class, 'salvarNewsletter'])->name('public.newsletter.salvar');
 
 /*
 |--------------------------------------------------------------------------

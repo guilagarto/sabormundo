@@ -54,14 +54,15 @@
         <!-- Botão Hambúrguer -->
         <button class="menu-toggle" id="menu-mobile-trigger" aria-label="Abrir Menu">☰</button>
         
-        <div class="public-menu" id="public-menu-box">
-            <a href="{{ route('public.home') }}" class="menu-item {{ request()->routeIs('public.home') ? 'active' : '' }}">🔥 Início</a>
-            <a href="#" class="menu-item">📊 Guia Nutricional</a>
-            <a href="#" class="menu-item">📖 Sobre</a>
-            <a href="#" class="menu-item">📰 Blog Nutricional</a>
-            <a href="{{ route('public.calculadora') }}" class="menu-item {{ request()->routeIs('public.calculadora') ? 'active' : '' }}">🧮 Calculadora</a>
-            <a href="{{ route('adm.receitas.index') }}" class="menu-item" style="background-color: #166534; color: #f8fafc;">💻 ADM</a>
-        </div>
+       <div class="public-menu" id="public-menu-box">
+    <a href="{{ route('public.home') }}" class="menu-item {{ request()->routeIs('public.home') ? 'active' : '' }}">🔥 Início</a>
+    <a href="#" class="menu-item">📊 Guia Nutricional</a>
+    <a href="{{ route('public.sobre') }}" class="menu-item {{ request()->routeIs('public.sobre') ? 'active' : '' }}">📖 Sobre</a>
+    <a href="{{ route('public.blognutricional') }}" class="menu-item {{ request()->routeIs('public.blognutricional') ? 'active' : '' }}">📰 Blog Nutricional</a>
+    <a href="{{ route('public.calculadora') }}" class="menu-item {{ request()->routeIs('public.calculadora') ? 'active' : '' }}">🧮 Calculadora</a>
+    <a href="{{ route('adm.receitas.index') }}" class="menu-item" style="background-color: #166534; color: #f8fafc;">💻 ADM</a>
+</div>
+
     </nav>
 
     <div class="container">
