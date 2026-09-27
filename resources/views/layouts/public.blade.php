@@ -91,5 +91,30 @@
     </script>
 
     @yield('scripts')
+
+    <!-- FOOTER EXCLUSIVO PARA APROVAÇÃO GOOGLE ADSENSE -->
+<!-- FOOTER ATUALIZADO PARA APROVAÇÃO GOOGLE ADSENSE E CRÉDITOS DO DESENVOLVEDOR -->
+<footer style="background-color: #0f172a; border-top: 1px solid #334155; padding: 30px 20px; font-family: 'Segoe UI', sans-serif; margin-top: 50px;">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        
+        <!-- Direitos Autorais -->
+        <div style="color: #94a3b8; font-size: 14px;">
+            &copy; {{ date('Y') }} <span style="color: #22c55e; font-weight: bold;">Mundo Sabor</span>. Todos os direitos reservados.
+        </div>
+        
+        <!-- Links de Navegação Obrigatórios Legais e Créditos -->
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <a href="{{ route('public.termos') }}" style="color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='#cbd5e1'">📄 Termos de Uso</a>
+            <a href="{{ route('public.privacidade') }}" style="color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='#cbd5e1'">🔒 Política de Privacidade</a>
+            
+            <!-- LINK EXTERNO ATUALIZADO PARA O SITE DO DESENVOLVEDOR -->
+            <a href="https://8ou80.com" target="_blank" rel="noopener text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='#cbd5e1'">💻 Desenvolvido por 8ou80</a>
+        </div>
+
+    </div>
+</footer>
+
+
+
 </body>
 </html>

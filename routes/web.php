@@ -56,6 +56,20 @@ Route::get('/guia-nutricional', [App\Http\Controllers\NutricaoController::class,
 | Usamos o 'prefix' para que todas as URLs comecem com /adm (ex: /adm/receitas)
 | Usamos o 'name' para que os apelidos comecem com adm. (ex: route('adm.receitas.index'))
 */
+
+Route::get('/politica-de-privacidade', function () {
+    // Aponta para a pasta public e chama o arquivo privacidade.blade.php
+    return view('public.privacidade'); 
+})->name('public.privacidade');
+
+Route::get('/termos-de-uso', function () {
+    // Aponta para a pasta public e chama o arquivo termos-uso.blade.php
+    return view('public.termos-uso'); 
+})->name('public.termos');
+
+
+
+
 Route::group(['prefix' => 'adm', 'as' => 'adm.'], function () {
     
     // Lista as receitas cadastradas e exibe os filtros por país
