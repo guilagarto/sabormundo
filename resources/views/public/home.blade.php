@@ -42,11 +42,14 @@
         <!-- Grid de Países vindos do Banco Sabor_db -->
         <div class="countries-grid">
             @forelse($paises as $pais)
-                <a href="{{ route('public.pais.receitas', $pais->id) }}" class="country-card">
-                    <!-- Ícone de bandeira padrão caso o campo esteja vazio no banco -->
-                    <div class="country-flag">🏳️</div>
-                    <div>{{ $pais->nome }}</div>
-                </a>
+               <a href="{{ route('public.pais.receitas', $pais->id) }}" class="country-card">
+    <!-- Exibe a Bandeira Oficial -->
+    <div class="country-flag">{{ $pais->bandeira ?? '🏳️' }}</div>
+    
+    <!-- EXIBE O NOME DO PAÍS LOGO ABAIXO -->
+    <div class="country-name" style="margin-top: 10px; font-weight: 700;">{{ $pais->nome }}</div>
+</a>
+
             @empty
                 <div style="grid-column: span 4; color: #94a3b8; padding: 40px;">
                     Nenhum país cadastrado no banco ainda. Certifique-se de rodar o seeder.

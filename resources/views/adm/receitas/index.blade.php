@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel ADM - Listagem de Receitas</title>
+@extends('layouts.admin')
+@section('styles')
     <style>
+
         /* Estilos nativos de alta performance */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 0; }
         .container { max-width: 1000px; margin: 40px auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
@@ -51,6 +48,10 @@
         /* Paginação */
         .pagination-container { margin-top: 25px; display: flex; justify-content: center; }
     </style>
+    @endsection
+
+@section('content')
+
 </head>
 <body>
 
@@ -155,3 +156,4 @@
 
 </body>
 </html>
+@endsection
